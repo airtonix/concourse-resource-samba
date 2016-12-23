@@ -1,0 +1,13 @@
+{
+  "foo": "bar",
+  "source": {
+    "server": "192.168.1.2",
+    "share": "storage",
+    "path": "Builds",
+    "user": "guest",
+    "password": "guest"
+  },
+  "version": {
+    "ref": 87162312
+  }
+}

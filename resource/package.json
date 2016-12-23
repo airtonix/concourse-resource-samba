@@ -1,0 +1,13 @@
+{
+  "name": "samba-resource",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "smb2": "*",
+    "tmpin": "^1.0.1",
+    "stdout": "*"
+  }
+}

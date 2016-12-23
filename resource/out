@@ -1,0 +1,4 @@
+#!/usr/bin/node
+
+import smb from "marsaud/smb2";
+import {RequestPayload} from './lib/request';

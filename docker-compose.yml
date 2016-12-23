@@ -1,0 +1,11 @@
+version: "2"
+services:
+  test:
+    build: .
+    volumes:
+      - "./test:/test"
+      - "./resource:/opt/resource"
+    working_dir: /opt/resource
+    command:
+      - "/test/run.sh"
+      - "/test/check.request.json"
