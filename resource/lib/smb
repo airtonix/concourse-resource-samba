@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+smb () {
+	([ -n "${1}" ]) \
+		&& connection=$1 \
+		|| abort "missing connect"
+	([ -n "${2}" ]) \
+		&& command=$2 \
+		|| abort "missing command"
+
+	/usr/local/bin/smbclient $connection -c "$command"
+}
+
+smb_list () {
+	([ -n "${1}" ]) \
+		&& server=$1 \
+		|| abort "missing server"
+	([ -n "${2}" ]) \
+		&& share=$2 \
+		|| abort "missing share"
+	([ -n "${3}" ]) \
+		&& path="; cd $3" \
+		|| path=""
+	([ -n "${4}" ]) \
+		&& pattern=$4 \
+		|| pattern="'*'"
+	([ -n "${5}" ]) \
+		&& user="--user=$5 " \
+		|| user=""
+	([ -n "${6}" ]) \
+		&& password="$6 " \
+		|| password="-N "
+	([ -n "${7}" ]) \
+		&& dest="; lcd $7 " \
+		|| dest=""
+
+	smb "//${server}/${share} $password $user -g" \
+		"prompt off ${path}; recurse; ls ${pattern}; exit;"
+}
+
+smb_get () {
+	([ -n "${1}" ]) \
+		&& server=$1 \
+		|| abort "missing server"
+	([ -n "${2}" ]) \
+		&& share=$2 \
+		|| abort "missing share"
+	([ -n "${3}" ]) \
+		&& path="; cd $3" \
+		|| path=""
+	([ -n "${4}" ]) \
+		&& pattern=$4 \
+		|| pattern="'*'"
+	([ -n "${5}" ]) \
+		&& user="--user=$5 " \
+		|| user=""
+	([ -n "${6}" ]) \
+		&& password="$6 " \
+		|| password="-N "
+	([ -n "${7}" ]) \
+		&& dest="; lcd $7 " \
+		|| dest=""
+
+	smb "//${server}/${share} $password $user -g" \
+		"prompt off ${path}${dest}; recurse; mget ${pattern}; exit;"
+}
+
+smb_put () {
+	([ -n "${1}" ]) \
+		&& server=$1 \
+		|| abort "missing server"
+	([ -n "${2}" ]) \
+		&& share=$2 \
+		|| abort "missing share"
+	([ -n "${3}" ]) \
+		&& path="; cd $3" \
+		|| path=""
+	([ -n "${4}" ]) \
+		&& pattern=$4 \
+		|| pattern="'*'"
+	([ -n "${5}" ]) \
+		&& user="--user=$5 " \
+		|| user=""
+	([ -n "${6}" ]) \
+		&& password="$6 " \
+		|| password="-N "
+	([ -n "${7}" ]) \
+		&& dest="; lcd $7 " \
+		|| dest=""
+
+	smb "//${server}/${share} $password $user -g" \
+		"prompt off ${path}${dest}; recurse; mput ${pattern}; exit;"
+}

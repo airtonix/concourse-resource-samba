@@ -7,5 +7,5 @@ services:
       - "./resource:/opt/resource"
     working_dir: /opt/resource
     command:
-      - "/test/run.sh"
+      - "/test/run"
       - "/test/check.request.json"

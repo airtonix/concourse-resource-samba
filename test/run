@@ -1,7 +1,11 @@
-#!/usr/bin/env sh
-LOG_PREFIX="test/run"
+#!/usr/bin/env bash
 
-echo "${LOG_PREFIX}.start"
+source /opt/resource/lib/log
+source /opt/resource/lib/smb
+
+set_log_prefix "test/run"
+log "start"
+
 export SRC_DIR=$PWD
 export BUILD_ID=1
 export BUILD_NAME='my-build'
@@ -12,4 +16,4 @@ export ATC_EXTERNAL_URL='127.0.0.1/atc'
 
 cat $1 | /opt/resource/check
 
-echo "${LOG_PREFIX}.end"
+log "end"

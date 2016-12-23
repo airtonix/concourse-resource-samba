@@ -1,1 +1,18 @@
 #!/usr/bin/env bash
+
+source ./lib/log
+source ./lib/smb
+
+SCRIPT_INPUT='/tmp/input'
+cat > $SCRIPT_INPUT <&0 # STDIN params
+
+SERVER=$(jq -r '(.source.servers + [.source.server])[0]' < $SCRIPT_INPUT)
+SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
+PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
+PATTERN=$(jq -r '.version.pattern // ""' < $SCRIPT_INPUT)
+SOURCE=$(jq -r '.version.source // ""' < $SCRIPT_INPUT)
+DEST=$(jq -r '.version.dest // ""' < $SCRIPT_INPUT)
+USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
+PASSWORD=$(jq -r '.version.password // ""' < $SCRIPT_INPUT)
+VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
+

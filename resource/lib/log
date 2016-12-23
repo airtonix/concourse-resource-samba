@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+LOG_PREFIX=''
+
+set_log_prefix () {
+  ([ -n "${1}" ]) \
+    && LOG_PREFIX="${1}." \
+    || LOG_PREFIX=""
+}
+
+log () {
+  echo "${LOG_PREFIX}${@}"
+}
+
+abort () {
+  log "abort"
+  exit 1
+}
