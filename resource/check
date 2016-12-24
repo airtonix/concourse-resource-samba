@@ -1,63 +1,64 @@
 #!/usr/bin/env bash
 
-# source /opt/resource/lib/log
-# source /opt/resource/lib/crypto
-# source /opt/resource/lib/net
+source /opt/resource/lib/colours
+source /opt/resource/lib/log
+source /opt/resource/lib/crypto
+source /opt/resource/lib/net
 
-# set_log_prefix "resource/check"
-# log "start"
+set_log_prefix "resource/check"
+log "start" $1
 
-# SCRIPT_INPUT='/tmp/input'
-# cat > $SCRIPT_INPUT <&0 # STDIN params
+destination=$1
+[ -z "${destination}" ] && abort "usage: $0 <path/to/destination>"
 
-# MANIFEST_PATH=$(mktemp /tmp/resource-samba.manifest.XXXXXX)
-# ARCHIVE_PATH=$(mktemp /tmp/resource-samba.archive.XXXXXX)
-# VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
-# SMB_SERVER=$(jq -r '.source.server // ""' < $SCRIPT_INPUT)
-# SMB_SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
-# SMB_PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
-# SMB_USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
-# SMB_PASSWORD=$(jq -r '.source.password // ""' < $SCRIPT_INPUT)
+# for jq
+PATH=/usr/local/bin:$PATH
 
-# log "build" "src_dir: " $SRC_DIR
-# log "build" "build_id: " $BUILD_ID
-# log "build" "build_name: " $BUILD_NAME
-# log "build" "build_job_name: " $BUILD_JOB_NAME
-# log "build" "build_pipeline_name: " $BUILD_PIPELINE_NAME
-# log "build" "atc_external_url: " $ATC_EXTERNAL_URL
+payload=$(mktemp -d /tmp/resource-check.XXXXXX)
+request=$payload/request
+response=$payload/response
+archive=$payload/archive
+touch $request
+touch $response
+touch $archive
 
-# log "status" "    version:" $VERSION
-# log "status" "     server:" $SMB_SERVER
-# log "status" "      share:" $SMB_SHARE
-# log "status" "       path:" $SMB_PATH
-# log "status" "    archive:" $ARCHIVE_PATH
-# log "status" "       user:" $SMB_USER
-# log "status" "   password:" $SMB_PASSWORD
+###
+# The request from Concourse
+cat > $request <&0
+log "request"
 
+connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
+path=$(jq -r '.source.path // ""' < $request)
+user=$(jq -r '.source.user // ""' < $request)
+password=$(jq -r '.source.password // ""' < $request)
+target=$(jq -r '.params.path // ""' < $request)
 
-# #
-# # Validation
-# #
-# [ -n "$VERSION" ] || abort "ERROR Version specifiation $VERSION invalid!"
+###
+# Get the resources
+# - build network command
+log "connection" $connection
+command=$(smb_get \
+	$connection \
+	$path \
+	$target \
+	$archive \
+	$user \
+	$password
+)
+log "command" $command
 
-# #
-# # Check Resource
-# # - fetch remote files as archive
-# smb_get \
-# 	$SMB_SERVER \
-# 	$SMB_SHARE \
-# 	$SMB_PATH \
-# 	$ARCHIVE_PATH \
-# 	$SMB_USER \
-# 	$SMB_PASSWORD
+# - execute network command
+eval $command 2>&1
 
-# #
-# # Response
-# # - generate hash from file binary contents
-# HASH=$(cat $ARCHIVE_PATH | generate_hash | format_hash)
-# if [ "${HASH}" = "${VERSION}" ]; then
-#   break
-# else
-# 	success "{ \"ref\": \"${HASH}\" }"
-# fi
+###
+# Examine retrieved resources
+# - generate fingerprint of archive contents
+hash=$(cat $archive | generate_hash | format_hash)
 
+###
+# Generate Response
+# - basic string, using the fingerprint
+response="{ \"ref\": \"${hash}\" }"
+log "response" $response
+# - send response
+echo $response

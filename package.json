@@ -1,0 +1,17 @@
+{
+  "name": "concourse-samba-resource",
+  "version": "1.0.0",
+  "description": "[concourse.ci](https://concourse.ci/ \"concourse.ci Homepage\") [resource](https://concourse.ci/implementing-resources.html \"Implementing a resource\") for persisting build artifacts on a shared storage location with rsync and ssh.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test:in": "cat ./test/in.request.json | docker-compose run test /test/run in /mnt/in",
+    "test:out": "cat ./test/out.request.json | docker-compose run test /test/run out /mnt/out",
+    "test:check": "cat ./test/in.request.json | docker-compose run test /test/run check /mnt/out"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

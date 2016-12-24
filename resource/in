@@ -14,17 +14,13 @@ destination=$1
 # for jq
 PATH=/usr/local/bin:$PATH
 
-context="{}"
 payload=$(mktemp -d /tmp/resource-in.XXXXXX)
 request=$payload/request
 response=$payload/response
 archive=$payload/archive
-context=$payload/context
 touch $request
 touch $response
 touch $archive
-touch $context
-
 
 ###
 # The request from Concourse

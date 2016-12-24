@@ -19,8 +19,7 @@ set_log_prefix () {
 #  * @void
 #  */
 log () {
-  clr_bold clr_green "${LOG_PREFIX}${1} " -n; \
-  	[ ${#@} -gt 1 ] && clr_reset ${@:2} 1>&2
+  clr_bold clr_green "${LOG_PREFIX}${1} " -n; echo ${@:2} 1>&2
 }
 
 # /**
