@@ -1,12 +1,15 @@
-# concourse-rsync-resource
-[concourse.ci](https://concourse.ci/ "concourse.ci Homepage") [resource](https://concourse.ci/implementing-resources.html "Implementing a resource") for persisting build artifacts on a shared storage location with rsync and ssh.
+# concourse-resource-samba
+
+[concourse.ci](https://concourse.ci/ "concourse.ci Homepage") [resource](https://concourse.ci/implementing-resources.html "Implementing a resource") for persisting build artifacts on a shared storage location with samba.
+
+- inspired by [concourse-rsync-resource](https://github.com/mrsixw/concourse-rsync-resource)
 
 ##Config
-* `server|servers`: *Required* Server or list of servers on which to persist artifacts. If `servers` are used first one in the list will be used for `in` and `check` origins.
-* `base_dir`: *Required* Base directory in which to place the artifacts
+* `server`: *Required* Server on which to persist artifacts.
+* `share`: *Required* Share name on `Server` in which to place the artifacts
+* `path`: *Required* Base directory in which to place the artifacts
 * `user`: *Required* User credential for login using ssh
-* `private_key`: *Required* Key for the specified user
-* `disable_version_path`: default is `false`. Then `false` `out` will put content in a directory named by the version name. This directory is omitted when this option is enabled. Note that `check` and `in` origins will treat all the files in the `base_dir` as versions in this case.
+* `password`: *Required* password for the specified user
 
 All config required for each of the `in`, `out` and `check` behaviors.
 
@@ -14,58 +17,46 @@ All config required for each of the `in`, `out` and `check` behaviors.
 
 ``` yaml
 resource_types:
-- name: rsync-resource
+- name: samba-resource
   type: docker-image
   source:
-      repository: mrsixw/concourse-rsync-resource
+      repository: airtonix/concourse-resource-samba
       tag: latest
 
 resources:
-- name: sync-resource
-  type: rsync-resource
+- name: samba-resource
+  type: samba-resource
   source:
-    server: server
-    base_dir: /sync_directory
+    server: my-server.lan
+    share: storage
     user : user
-    private_key: |
-            ...
-
-- name: sync-resource-multiple
-  type: rsync-resource
-  source:
-    servers:
-      - server1
-      - server2
-    base_dir: /sync_directory
-    user : user
-    disable_version_path: false
-    private_key: |
-            ...
+    password: {{ samba_password_from_env }}
 
 jobs:
--name: my_great_job
+-name: the-big-payback
   plan:
-    ...
-    put: sync-resource
-      params: {"sync_dir" : "my_output_dir" }
-    put: sync-resource
-      params: {
-          "sync_dir" : "my_output_dir",
-          "rsync_opts": ["-Pav", "--del", "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fog=r"]
-      }
+    get: samba-resource
+      params: {"path" : "directory-name-we-want-to-fetch" }
+    put: samba-resource
+      params: {"path" : "directory-name-we-want-to-create" }
 ```
 
-##Behavior
+## Behavior
+
 ### `check` : Check for new versions of artifacts
-The `base_dir` is searched for any new artifacts being stored
+- using smbclient, uses tar to backup `//server/share/path/$params.path` as `$params.path`
+- generate an md5sum hash of the tarball as `version`
 
 ### `in` : retrieve a given artifacts from `server`
-Given a `version` check for its existence and rsync back the artifacts for the
-version.
+- same as `check`, but inspects `check.version` against `version`
+- if it's different, Unpacks the tarball to current concourse workingd directory.
 
 ### `out` : place a new artifact on `server`
-Generate a new `version` number an associated directory in `base_dir` on `server`
-using the specified user credential. Rsync across artifacts from the input directory to the server storage location and output the `version`
+- archives the working directory into a tarball
+- generates a md5sum hash of the tarball as the new `version`
+- uploads and unpacks it via smb to `//server/share/path/$params.path`
+- outputs the `version`
+
 #### Parameters
 
-* `sync_dir`: *Optional.* Directory to be sync'd. If specified limit the directory to be sync'd to sync_dir. If not specified everything in the `put` will be sent (which could include container resources, whole build trees etc.)
+* `path`: *Optional.* Directory to be bundled.
