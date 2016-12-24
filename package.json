@@ -1,6 +1,6 @@
 {
   "name": "concourse-samba-resource",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "[concourse.ci](https://concourse.ci/ \"concourse.ci Homepage\") [resource](https://concourse.ci/implementing-resources.html \"Implementing a resource\") for persisting build artifacts on a shared storage location with samba.",
   "main": "index.js",
   "directories": {
