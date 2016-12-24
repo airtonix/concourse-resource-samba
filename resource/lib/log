@@ -2,17 +2,38 @@
 
 LOG_PREFIX=''
 
+# /**
+#  * Set the prefix for log messages
+#  */
 set_log_prefix () {
   ([ -n "${1}" ]) \
     && LOG_PREFIX="${1}." \
     || LOG_PREFIX=""
 }
 
+# /**
+#  * logs message to stdout with optional prefix
+#  * Print to stdout
+#  * @void
+#  */
 log () {
-  echo "${LOG_PREFIX}${@}"
+  echo "${LOG_PREFIX}${1}" ${@:2}
 }
 
+# /**
+#  * aborts program with message
+#  * @return {Exit 1}
+#  */
 abort () {
-  log "abort"
+  log "abort" ${@:1}
   exit 1
+}
+
+# /**
+#  * Return success
+#  * @return {Exit 0}
+#  */
+success () {
+  echo $@
+  exit 0
 }

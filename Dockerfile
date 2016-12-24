@@ -8,6 +8,8 @@ RUN apk update && \
 		jq \
 		samba-client
 
+
 RUN mkdir /mnt/storage
-ADD ./resource /opt/resource
+
+COPY ./resource/* /opt/resource/
 RUN chmod +x /opt/resource/*

@@ -6,6 +6,4 @@ services:
       - "./test:/test"
       - "./resource:/opt/resource"
     working_dir: /opt/resource
-    command:
-      - "/test/run"
-      - "/test/check.request.json"
+    command: ["/test/run"]

@@ -4,38 +4,8 @@ smb () {
 	([ -n "${1}" ]) \
 		&& connection=$1 \
 		|| abort "missing connect"
-	([ -n "${2}" ]) \
-		&& command=$2 \
-		|| abort "missing command"
 
-	/usr/local/bin/smbclient $connection -c "$command"
-}
-
-smb_list () {
-	([ -n "${1}" ]) \
-		&& server=$1 \
-		|| abort "missing server"
-	([ -n "${2}" ]) \
-		&& share=$2 \
-		|| abort "missing share"
-	([ -n "${3}" ]) \
-		&& path="; cd $3" \
-		|| path=""
-	([ -n "${4}" ]) \
-		&& pattern=$4 \
-		|| pattern="'*'"
-	([ -n "${5}" ]) \
-		&& user="--user=$5 " \
-		|| user=""
-	([ -n "${6}" ]) \
-		&& password="$6 " \
-		|| password="-N "
-	([ -n "${7}" ]) \
-		&& dest="; lcd $7 " \
-		|| dest=""
-
-	smb "//${server}/${share} $password $user -g" \
-		"prompt off ${path}; recurse; ls ${pattern}; exit;"
+	/usr/bin/smbclient $connection ${@:1}
 }
 
 smb_get () {
@@ -46,23 +16,22 @@ smb_get () {
 		&& share=$2 \
 		|| abort "missing share"
 	([ -n "${3}" ]) \
-		&& path="; cd $3" \
-		|| path=""
+		&& archive=$3 \
+		|| archive=""
 	([ -n "${4}" ]) \
-		&& pattern=$4 \
-		|| pattern="'*'"
+		&& manifest=$4 \
+		|| manifest=""
 	([ -n "${5}" ]) \
 		&& user="--user=$5 " \
 		|| user=""
 	([ -n "${6}" ]) \
 		&& password="$6 " \
-		|| password="-N "
-	([ -n "${7}" ]) \
-		&& dest="; lcd $7 " \
-		|| dest=""
+		|| password="'' -N "
 
-	smb "//${server}/${share} $password $user -g" \
-		"prompt off ${path}${dest}; recurse; mget ${pattern}; exit;"
+	log "manifest" $manifest
+
+	smb "//${server}/${share} $password $user" -TcF $archive $manifest
+
 }
 
 smb_put () {
@@ -73,21 +42,24 @@ smb_put () {
 		&& share=$2 \
 		|| abort "missing share"
 	([ -n "${3}" ]) \
-		&& path="; cd $3" \
-		|| path=""
+		&& manifest=$3 \
+		|| manifest=""
 	([ -n "${4}" ]) \
-		&& pattern=$4 \
-		|| pattern="'*'"
-	([ -n "${5}" ]) \
-		&& user="--user=$5 " \
+		&& user="--user=$4 " \
 		|| user=""
-	([ -n "${6}" ]) \
-		&& password="$6 " \
-		|| password="-N "
-	([ -n "${7}" ]) \
-		&& dest="; lcd $7 " \
-		|| dest=""
+	([ -n "${5}" ]) \
+		&& password="$5 " \
+		|| password="'' -N "
 
-	smb "//${server}/${share} $password $user -g" \
-		"prompt off ${path}${dest}; recurse; mput ${pattern}; exit;"
+	smb "//${server}/${share} $password $user" --grepable --debuglevel=0 -TXx $manifest
+
+}
+
+hash () {
+	PLATFORM=`uname`
+	MD5_TOOL="md5sum"
+	if [ $PLATFORM = "Darwin" ]; then
+	  MD5_TOOL="md5"
+	fi
+	$MD5_TOOL < $@ | awk '{ print $1 }'
 }

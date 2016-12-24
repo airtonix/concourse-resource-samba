@@ -1,11 +1,12 @@
 {
-  "foo": "bar",
   "source": {
+    "user": "guest",
+    "password": "guest",
     "server": "192.168.1.2",
     "share": "storage",
-    "path": "Builds",
-    "user": "guest",
-    "password": "guest"
+    "manifest": [
+      "./Builds"
+    ]
   },
   "version": {
     "ref": 87162312

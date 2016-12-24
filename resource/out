@@ -3,16 +3,29 @@
 source ./lib/log
 source ./lib/smb
 
+set_log_prefix "resource/check"
+
 SCRIPT_INPUT='/tmp/input'
 cat > $SCRIPT_INPUT <&0 # STDIN params
 
-SERVER=$(jq -r '(.source.servers + [.source.server])[0]' < $SCRIPT_INPUT)
-SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
-PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
-PATTERN=$(jq -r '.version.pattern // ""' < $SCRIPT_INPUT)
-SOURCE=$(jq -r '.version.source // ""' < $SCRIPT_INPUT)
-DEST=$(jq -r '.version.dest // ""' < $SCRIPT_INPUT)
-USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
-PASSWORD=$(jq -r '.version.password // ""' < $SCRIPT_INPUT)
+LOCAL_PATH=/mnt/storage
+
 VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
 
+SMB_SERVER=$(jq -r '.source.server // ""' < $SCRIPT_INPUT)
+SMB_SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
+SMB_PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
+SMB_PATTERN=$(jq -r '.source.pattern // ""' < $SCRIPT_INPUT)
+SMB_USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
+SMB_PASSWORD=$(jq -r '.source.password // ""' < $SCRIPT_INPUT)
+
+log " -- Container --"
+log "  localPath:" $LOCAL_PATH
+log "    version:" $VERSION
+log " -- Server --"
+log "       user:" $SMB_USER
+log "   password:" $SMB_PASSWORD
+log "     server:" $SMB_SERVER
+log "      share:" $SMB_SHARE
+log "       path:" $SMB_PATH
+log "    pattern:" $SMB_PATTERN
