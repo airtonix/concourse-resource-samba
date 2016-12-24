@@ -55,7 +55,18 @@ smb_put () {
 
 }
 
-hash () {
+smb_create_manifest () {
+	([ -n "${1}" ]) \
+		&& map=$1 \
+		|| abort "missing map"
+	([ -n "${2}" ]) \
+		&& target=$2 \
+		|| abort "missing target file"
+
+	printf "%s\n" "${map}" > $target
+}
+
+smb_generate_hash () {
 	PLATFORM=`uname`
 	MD5_TOOL="md5sum"
 	if [ $PLATFORM = "Darwin" ]; then

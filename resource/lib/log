@@ -17,7 +17,7 @@ set_log_prefix () {
 #  * @void
 #  */
 log () {
-  echo "${LOG_PREFIX}${1}" ${@:2}
+  echo "${LOG_PREFIX}${1}" ${@:2} 1>&2
 }
 
 # /**
