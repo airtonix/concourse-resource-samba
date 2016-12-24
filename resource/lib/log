@@ -28,7 +28,7 @@ log () {
 #  * @return {Exit 1}
 #  */
 abort () {
-  clr_bold clr_red "abort" ${@:1} 1>&2
+  clr_bold clr_red "${LOG_PREFIX}abort " -n; echo $@ 1>&2
   exit 1
 }
 

@@ -9,7 +9,6 @@ set_log_prefix "resource/in"
 log "start" $1
 
 destination=$1
-
 [ -z "${destination}" ] && abort "usage: $0 <path/to/destination>"
 
 # for jq
@@ -26,10 +25,11 @@ touch $response
 touch $archive
 touch $context
 
-cat > $request <&0
 
+###
+# The request from Concourse
+cat > $request <&0
 log "request"
-jq --color-output '.' $request
 
 connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
 path=$(jq -r '.source.path // ""' < $request)
@@ -37,10 +37,10 @@ user=$(jq -r '.source.user // ""' < $request)
 password=$(jq -r '.source.password // ""' < $request)
 target=$(jq -r '.params.path // ""' < $request)
 
-log "connection" $connection
 ###
 # Get the resources
 # - build network command
+log "connection" $connection
 command=$(smb_get \
 	$connection \
 	$path \

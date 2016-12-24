@@ -28,8 +28,6 @@ smb_get () {
 		&& password="${6} " \
 		|| password="'' -N "
 
-  # log "smb_get.pulling-into-archive" "$archive" "from" "$4"
-
 	smb "$unc $password $user $path" -Tc $archive $target
 }
 
@@ -41,17 +39,19 @@ smb_put () {
 		&& path="--directory=${2}" \
 		|| path=""
 	([ -n "${3}" ]) \
-		&& archive=$3 \
-		|| archive=""
+		&& target="${3}" \
+		|| target=""
 	([ -n "${4}" ]) \
-		&& user="--user=${4} " \
-		|| user=""
+		&& archive=$4 \
+		|| archive=""
 	([ -n "${5}" ]) \
-		&& password="${5} " \
+		&& user="--user=${5} " \
+		|| user=""
+	([ -n "${6}" ]) \
+		&& password="${6} " \
 		|| password="'' -N "
 
-  # log "smb_put.pushing-up-archive" "$archive" "to" "$2"
-	smb "$unc ${path} ${password} ${user}" -Tx $archive
+	smb "$unc $password $user $path" -Tx $archive
 }
 
 

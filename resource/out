@@ -1,101 +1,60 @@
 #!/usr/bin/env bash
 
-# source /opt/resource/lib/log
-# source /opt/resource/lib/crypto
-# source /opt/resource/lib/net
+source /opt/resource/lib/colours
+source /opt/resource/lib/log
+source /opt/resource/lib/crypto
+source /opt/resource/lib/net
 
-# set_log_prefix "resource/out"
-# log "start"
+set_log_prefix "resource/out"
+log "start" $1
 
-# set -e
+src=$1
+[ -z "${src}" ] && abort "usage: ${0} <path/to/destination>"
 
-# exec 3>&1 # make stdout available as fd 3 for the result
-# exec 1>&2 # redirect all output to stderr for logging
+# for jq
+PATH=/usr/local/bin:$PATH
 
-# SRC_DIR=${1:-/mnt/storage}
-# SCRIPT_INPUT='/tmp/input'
-# cat > $SCRIPT_INPUT <&0 # STDIN params
+version="${BUILD_PIPELINE_NAME}-${BUILD_ID}"
+payload=$(mktemp -d /tmp/resource-out.XXXXXX)
+request=$payload/request
+response=$payload/response
+archive=$payload/archive
+bundle=$payload/bundle
+touch $request
+touch $response
+touch $archive
+mkdir $bundle/$version -p
 
-# MANIFEST_PATH=$(mktemp /tmp/resource-samba.manifest.XXXXXX)
-# ARCHIVE_PATH=$(mktemp -d /tmp/resource-samba.archive.XXXXXX)
-# VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
-# SMB_SERVER=$(jq -r '.source.server // ""' < $SCRIPT_INPUT)
-# SMB_SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
-# SMB_PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
-# SMB_USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
-# SMB_PASSWORD=$(jq -r '.source.password // ""' < $SCRIPT_INPUT)
+###
+# The request from Concourse
+cat > $request <&0
+log "request"
 
-# log "build" "src_dir: " $SRC_DIR
-# log "build" "build_id: " $BUILD_ID
-# log "build" "build_name: " $BUILD_NAME
-# log "build" "build_job_name: " $BUILD_JOB_NAME
-# log "build" "build_pipeline_name: " $BUILD_PIPELINE_NAME
-# log "build" "atc_external_url: " $ATC_EXTERNAL_URL
+connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
+path=$(jq -r '.source.path // ""' < $request)
+user=$(jq -r '.source.user // ""' < $request)
+password=$(jq -r '.source.password // ""' < $request)
+target=$(jq -r '.params.path // ""' < $request)
 
-# log "status" "    version:" $VERSION
-# log "status" "     server:" $SMB_SERVER
-# log "status" "      share:" $SMB_SHARE
-# log "status" "       path:" $SMB_PATH
-# log "status" "    archive:" $ARCHIVE_PATH
-# log "status" "       user:" $SMB_USER
-# log "status" "   password:" $SMB_PASSWORD
+###
+# Generate the archive
+#
+log "to-upload" $(ls $src)
+cd $src && \
+	cp -a ./* $bundle/$version/ && \
+	tar C $bundle -cf $archive .
 
-# #
-# # Validation
-# #
-# [ -n "$VERSION" ] || abort "ERROR Version specifiation $VERSION invalid!"
-
-# VERSION_STRING="$BUILD_PIPELINE_NAME-$BUILD_ID"
-# VERSION_STRING_HASH=$(echo "${VERSION_STRING}" | generate_hash | format_hash)
-# log "version.string" $VERSION_STRING
-# log "version.hash" $VERSION_STRING_HASH
-# SMB_PATH=${SMB_PATH:-BASE_DIR/$VERSION_STRING_HASH}
-
-# #
-# # Create the archive
-# #
-# ARCHIVE_NAME="${VERSION_STRING}.tar"
-# cd $ARCHIVE_PATH
-# mkdir $VERSION_STRING
-# cp -a $SRC_DIR/* $ARCHIVE_PATH/$VERSION_STRING
-# tar cvf $ARCHIVE_NAME ./$VERSION_STRING
-
-# #
-# # Check Resource
-# # - fetch remote files as archive
-# REPORTED_VERSION=0
-# COMMAND=$(smb_put \
-#   $SMB_SERVER \
-#   $SMB_SHARE \
-#   $SMB_PATH \
-#   $ARCHIVE_PATH/$ARCHIVE_NAME \
-#   $SMB_USER \
-#   $SMB_PASSWORD
-# )
-# log "command:" $COMMAND
-
-# eval $COMMAND  1>&2
-# rm $ARCHIVE_PATH/$ARCHIVE_NAME
-
-# if [ $? -eq 0 ]; then
-#   #
-#   # Check Resource
-#   # - fetch remote files as archive
-#   smb_get \
-#     $SMB_SERVER \
-#     $SMB_SHARE \
-#     $SMB_PATH \
-#     $ARCHIVE_PATH \
-#     $SMB_USER \
-#     $SMB_PASSWORD
-
-#   ls -al $ARCHIVE_PATH
-
-#   if [ $REPORTED_VERSION -eq 0 ]; then
-#     HASH=$(cat $ARCHIVE_PATH | generate_hash | format_hash)
-#     success "{ \"ref\": \"${HASH}\" }"
-#     REPORTED_VERSION=1
-#   fi
-# else
-#   abort "failed to upload"
-# fi
+###
+# Put the resources
+# - build network command
+log "connection" $connection
+command=$(smb_put \
+	$connection \
+	$path \
+	$target \
+	$archive \
+	$user \
+	$password
+)
+# - execute network command
+eval $command 2>&1
