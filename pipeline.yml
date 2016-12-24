@@ -1,5 +1,23 @@
-resource-types:
-  - name: samba-share
-    type: docker-image
-    source:
-      repository: airtonix/concourse-samba-resource
+jobs:
+- name: job-publish
+  public: true
+  serial: true
+  plan:
+  - get: repo
+  - put: dockerhub
+    params:
+      build: repo
+
+resources:
+- name: repo
+  type: git
+  source:
+    uri: https://github.com/airtonix/concourse-samba-resource.git
+
+- name: dockerhub
+  type: docker-image
+  source:
+    email: {{docker-hub-email}}
+    username: {{docker-hub-username}}
+    password: {{docker-hub-password}}
+    repository: {{docker-hub-repo__concourse-samba-resource}}
