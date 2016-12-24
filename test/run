@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 source /opt/resource/lib/log
-source /opt/resource/lib/smb
 
 set_log_prefix "test/run"
 log "start"
@@ -13,6 +12,9 @@ export BUILD_JOB_NAME='my-build-job'
 export BUILD_PIPELINE_NAME='my-build-pipeline'
 export ATC_EXTERNAL_URL='127.0.0.1/atc'
 
-/opt/resource/check
+COMMAND="/opt/resource/${1:-check}"
+log "command" $COMMAND
+
+exec $COMMAND ${@:2}
 
 log "end"

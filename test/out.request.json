@@ -1,0 +1,15 @@
+{
+  "source": {
+    "user": "guest",
+    "password": "guest",
+    "server": "192.168.1.2",
+    "share": "storage",
+    "path": "Builds"
+  },
+  "version": {
+    "ref": ""
+  },
+  "params": {
+    "path": "my-build-pipeline-1"
+  }
+}

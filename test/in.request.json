@@ -4,11 +4,12 @@
     "password": "guest",
     "server": "192.168.1.2",
     "share": "storage",
-    "manifest": [
-      "./Builds"
-    ]
+    "path": "Builds"
   },
   "version": {
-    "ref": 87162312
+    "ref": ""
+  },
+  "params": {
+    "path": "my-build-pipeline-1"
   }
 }

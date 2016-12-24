@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+smb () {
+	([ -n "${1}" ]) \
+		&& connection=$1 \
+		|| abort "missing connect"
+
+	echo "/usr/bin/smbclient $connection --grepable --debuglevel=0 ${@:2}"
+}
+
+smb_get () {
+	([ -n "${1}" ]) \
+		&& unc=$1 \
+		|| abort "missing //server/share"
+	([ -n "${2}" ]) \
+		&& path="--directory=${2}" \
+		|| path=""
+	([ -n "${3}" ]) \
+		&& target="${3}" \
+		|| target=""
+	([ -n "${4}" ]) \
+		&& archive=$4 \
+		|| archive=""
+	([ -n "${5}" ]) \
+		&& user="--user=${5} " \
+		|| user=""
+	([ -n "${6}" ]) \
+		&& password="${6} " \
+		|| password="'' -N "
+
+  # log "smb_get.pulling-into-archive" "$archive" "from" "$4"
+
+	smb "$unc $password $user $path" -Tc $archive $target
+}
+
+smb_put () {
+	([ -n "${1}" ]) \
+		&& unc=$1 \
+		|| abort "missing //server/share"
+	([ -n "${2}" ]) \
+		&& path="--directory=${2}" \
+		|| path=""
+	([ -n "${3}" ]) \
+		&& archive=$3 \
+		|| archive=""
+	([ -n "${4}" ]) \
+		&& user="--user=${4} " \
+		|| user=""
+	([ -n "${5}" ]) \
+		&& password="${5} " \
+		|| password="'' -N "
+
+  # log "smb_put.pushing-up-archive" "$archive" "to" "$2"
+	smb "$unc ${path} ${password} ${user}" -Tx $archive
+}
+
+

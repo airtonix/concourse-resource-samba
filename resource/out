@@ -1,31 +1,101 @@
 #!/usr/bin/env bash
 
-source ./lib/log
-source ./lib/smb
+# source /opt/resource/lib/log
+# source /opt/resource/lib/crypto
+# source /opt/resource/lib/net
 
-set_log_prefix "resource/check"
+# set_log_prefix "resource/out"
+# log "start"
 
-SCRIPT_INPUT='/tmp/input'
-cat > $SCRIPT_INPUT <&0 # STDIN params
+# set -e
 
-LOCAL_PATH=/mnt/storage
+# exec 3>&1 # make stdout available as fd 3 for the result
+# exec 1>&2 # redirect all output to stderr for logging
 
-VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
+# SRC_DIR=${1:-/mnt/storage}
+# SCRIPT_INPUT='/tmp/input'
+# cat > $SCRIPT_INPUT <&0 # STDIN params
 
-SMB_SERVER=$(jq -r '.source.server // ""' < $SCRIPT_INPUT)
-SMB_SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
-SMB_PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
-SMB_PATTERN=$(jq -r '.source.pattern // ""' < $SCRIPT_INPUT)
-SMB_USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
-SMB_PASSWORD=$(jq -r '.source.password // ""' < $SCRIPT_INPUT)
+# MANIFEST_PATH=$(mktemp /tmp/resource-samba.manifest.XXXXXX)
+# ARCHIVE_PATH=$(mktemp -d /tmp/resource-samba.archive.XXXXXX)
+# VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
+# SMB_SERVER=$(jq -r '.source.server // ""' < $SCRIPT_INPUT)
+# SMB_SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
+# SMB_PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
+# SMB_USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
+# SMB_PASSWORD=$(jq -r '.source.password // ""' < $SCRIPT_INPUT)
 
-log " -- Container --"
-log "  localPath:" $LOCAL_PATH
-log "    version:" $VERSION
-log " -- Server --"
-log "       user:" $SMB_USER
-log "   password:" $SMB_PASSWORD
-log "     server:" $SMB_SERVER
-log "      share:" $SMB_SHARE
-log "       path:" $SMB_PATH
-log "    pattern:" $SMB_PATTERN
+# log "build" "src_dir: " $SRC_DIR
+# log "build" "build_id: " $BUILD_ID
+# log "build" "build_name: " $BUILD_NAME
+# log "build" "build_job_name: " $BUILD_JOB_NAME
+# log "build" "build_pipeline_name: " $BUILD_PIPELINE_NAME
+# log "build" "atc_external_url: " $ATC_EXTERNAL_URL
+
+# log "status" "    version:" $VERSION
+# log "status" "     server:" $SMB_SERVER
+# log "status" "      share:" $SMB_SHARE
+# log "status" "       path:" $SMB_PATH
+# log "status" "    archive:" $ARCHIVE_PATH
+# log "status" "       user:" $SMB_USER
+# log "status" "   password:" $SMB_PASSWORD
+
+# #
+# # Validation
+# #
+# [ -n "$VERSION" ] || abort "ERROR Version specifiation $VERSION invalid!"
+
+# VERSION_STRING="$BUILD_PIPELINE_NAME-$BUILD_ID"
+# VERSION_STRING_HASH=$(echo "${VERSION_STRING}" | generate_hash | format_hash)
+# log "version.string" $VERSION_STRING
+# log "version.hash" $VERSION_STRING_HASH
+# SMB_PATH=${SMB_PATH:-BASE_DIR/$VERSION_STRING_HASH}
+
+# #
+# # Create the archive
+# #
+# ARCHIVE_NAME="${VERSION_STRING}.tar"
+# cd $ARCHIVE_PATH
+# mkdir $VERSION_STRING
+# cp -a $SRC_DIR/* $ARCHIVE_PATH/$VERSION_STRING
+# tar cvf $ARCHIVE_NAME ./$VERSION_STRING
+
+# #
+# # Check Resource
+# # - fetch remote files as archive
+# REPORTED_VERSION=0
+# COMMAND=$(smb_put \
+#   $SMB_SERVER \
+#   $SMB_SHARE \
+#   $SMB_PATH \
+#   $ARCHIVE_PATH/$ARCHIVE_NAME \
+#   $SMB_USER \
+#   $SMB_PASSWORD
+# )
+# log "command:" $COMMAND
+
+# eval $COMMAND  1>&2
+# rm $ARCHIVE_PATH/$ARCHIVE_NAME
+
+# if [ $? -eq 0 ]; then
+#   #
+#   # Check Resource
+#   # - fetch remote files as archive
+#   smb_get \
+#     $SMB_SERVER \
+#     $SMB_SHARE \
+#     $SMB_PATH \
+#     $ARCHIVE_PATH \
+#     $SMB_USER \
+#     $SMB_PASSWORD
+
+#   ls -al $ARCHIVE_PATH
+
+#   if [ $REPORTED_VERSION -eq 0 ]; then
+#     HASH=$(cat $ARCHIVE_PATH | generate_hash | format_hash)
+#     success "{ \"ref\": \"${HASH}\" }"
+#     REPORTED_VERSION=1
+#   fi
+# else
+#   abort "failed to upload"
+# fi

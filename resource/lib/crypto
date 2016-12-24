@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+
+generate_hash () {
+	PLATFORM=`uname`
+	MD5_TOOL="md5sum"
+	if [ $PLATFORM = "Darwin" ]; then
+	  MD5_TOOL="md5"
+	fi
+	$MD5_TOOL
+}
+
+format_hash () {
+	awk '{ print $1 }'
+}

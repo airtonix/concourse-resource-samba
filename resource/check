@@ -1,61 +1,63 @@
 #!/usr/bin/env bash
 
-source ./lib/log
-source ./lib/smb
+# source /opt/resource/lib/log
+# source /opt/resource/lib/crypto
+# source /opt/resource/lib/net
 
-set_log_prefix "resource/check"
+# set_log_prefix "resource/check"
+# log "start"
 
-SCRIPT_INPUT='/tmp/input'
-cat > $SCRIPT_INPUT <&0 # STDIN params
+# SCRIPT_INPUT='/tmp/input'
+# cat > $SCRIPT_INPUT <&0 # STDIN params
 
-MANIFEST_PATH=$(mktemp /mnt/storage/resource-samba.manifest.XXXXXX)
-ARCHIVE_PATH=$(mktemp /mnt/storage/resource-samba.archive.XXXXXX)
-VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
-SMB_SERVER=$(jq -r '.source.server // ""' < $SCRIPT_INPUT)
-SMB_SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
-SMB_MANIFEST=$(jq -r '.source.manifest[] // []' < $SCRIPT_INPUT)
-SMB_USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
-SMB_PASSWORD=$(jq -r '.source.password // ""' < $SCRIPT_INPUT)
+# MANIFEST_PATH=$(mktemp /tmp/resource-samba.manifest.XXXXXX)
+# ARCHIVE_PATH=$(mktemp /tmp/resource-samba.archive.XXXXXX)
+# VERSION=$(jq -r '.version.ref // ""' < $SCRIPT_INPUT)
+# SMB_SERVER=$(jq -r '.source.server // ""' < $SCRIPT_INPUT)
+# SMB_SHARE=$(jq -r '.source.share // ""' < $SCRIPT_INPUT)
+# SMB_PATH=$(jq -r '.source.path // ""' < $SCRIPT_INPUT)
+# SMB_USER=$(jq -r '.source.user // ""' < $SCRIPT_INPUT)
+# SMB_PASSWORD=$(jq -r '.source.password // ""' < $SCRIPT_INPUT)
 
-log "build" "src_dir: " $SRC_DIR
-log "build" "build_id: " $BUILD_ID
-log "build" "build_name: " $BUILD_NAME
-log "build" "build_job_name: " $BUILD_JOB_NAME
-log "build" "build_pipeline_name: " $BUILD_PIPELINE_NAME
-log "build" "atc_external_url: " $ATC_EXTERNAL_URL
+# log "build" "src_dir: " $SRC_DIR
+# log "build" "build_id: " $BUILD_ID
+# log "build" "build_name: " $BUILD_NAME
+# log "build" "build_job_name: " $BUILD_JOB_NAME
+# log "build" "build_pipeline_name: " $BUILD_PIPELINE_NAME
+# log "build" "atc_external_url: " $ATC_EXTERNAL_URL
 
-log "status" "   manifest:" $MANIFEST_PATH
-log "status" "    archive:" $ARCHIVE_PATH
-log "status" "    version:" $VERSION
-log "status" "       user:" $SMB_USER
-log "status" "   password:" $SMB_PASSWORD
-log "status" "     server:" $SMB_SERVER
-log "status" "      share:" $SMB_SHARE
-log "status" "   manifest:" $SMB_MANIFEST
-log "status" "    pattern:" $SMB_PATTERN
+# log "status" "    version:" $VERSION
+# log "status" "     server:" $SMB_SERVER
+# log "status" "      share:" $SMB_SHARE
+# log "status" "       path:" $SMB_PATH
+# log "status" "    archive:" $ARCHIVE_PATH
+# log "status" "       user:" $SMB_USER
+# log "status" "   password:" $SMB_PASSWORD
 
-#
-# Validation
-#
-[ -n "$VERSION" ] || abort "ERROR Version specifiation $VERSION invalid!"
 
-#
-# Check Resource
-# - dump manifest array to file
-printf "%s\n" "${SMB_MANIFEST[@]}" > $MANIFEST_PATH
-# - fetch remote files as archive
-smb_get $SMB_SERVER $SMB_SHARE $ARCHIVE_PATH $MANIFEST_PATH $SMB_USER $SMB_PASSWORD
+# #
+# # Validation
+# #
+# [ -n "$VERSION" ] || abort "ERROR Version specifiation $VERSION invalid!"
 
-#
-# Response
-# - generate hash
-HASH=$(smb_generate_hash $ARCHIVE_PATH)
+# #
+# # Check Resource
+# # - fetch remote files as archive
+# smb_get \
+# 	$SMB_SERVER \
+# 	$SMB_SHARE \
+# 	$SMB_PATH \
+# 	$ARCHIVE_PATH \
+# 	$SMB_USER \
+# 	$SMB_PASSWORD
 
-if [ "${HASH}" = "${VERSION}" ]; then
-  break
-fi
-
-if [ "${HASH}" != "${VERSION}" ]; then
-	success "{ \"ref\": \"${HASH}\" }"
-fi
+# #
+# # Response
+# # - generate hash from file binary contents
+# HASH=$(cat $ARCHIVE_PATH | generate_hash | format_hash)
+# if [ "${HASH}" = "${VERSION}" ]; then
+#   break
+# else
+# 	success "{ \"ref\": \"${HASH}\" }"
+# fi
 
