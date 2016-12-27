@@ -36,4 +36,5 @@ jobs:
     params:
       build: repo
       tag_as_latest: true
+      tag: version/version
 
