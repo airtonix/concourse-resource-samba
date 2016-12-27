@@ -4,17 +4,23 @@
   "description": "[concourse.ci](https://concourse.ci/ \"concourse.ci Homepage\") [resource](https://concourse.ci/implementing-resources.html \"Implementing a resource\") for persisting build artifacts on a shared storage location with samba.",
   "main": "index.js",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "resource": "resource",
+    "ci": "ci"
   },
   "scripts": {
-    "test:in": "cat ./test/in.request.json | docker-compose run test /test/run in /mnt/in",
-    "test:out": "cat ./test/out.request.json | docker-compose run test /test/run out /mnt/out",
-    "test:check": "cat ./test/in.request.json | docker-compose run test /test/run check /mnt/out"
+    "jake": "jake",
+    "postversion": "jake"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cash-cat": "^0.2.0"
+    "babel-cli": "^6.18.0",
+    "babel-preset-node6": "^11.0.0",
+    "cash-cat": "^0.2.0",
+    "coffee-script": "^1.12.2",
+    "jake": "^8.0.15",
+    "node-vault-js": "^1.2.0"
   }
 }

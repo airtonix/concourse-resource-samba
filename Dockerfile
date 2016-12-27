@@ -13,5 +13,5 @@ RUN apk update && \
 RUN mkdir /mnt/{in, out}
 VOLUME /mnt/in
 VOLUME /mnt/out
-COPY ./resource/* /opt/resource/
-RUN chmod +x /opt/resource/*
+COPY ./resource/ /opt/resource/
+RUN chmod -R +x /opt/resource/*
