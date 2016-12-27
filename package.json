@@ -9,8 +9,7 @@
     "ci": "ci"
   },
   "scripts": {
-    "jake": "jake",
-    "postversion": "jake"
+    "jake": "jake"
   },
   "keywords": [],
   "author": "",

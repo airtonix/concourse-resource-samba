@@ -2,14 +2,25 @@ resources:
 - name: repo
   type: git
   source:
-    uri: https://github.com/airtonix/concourse-samba-resource.git
+    uri: git@github.com:airtonix/concourse-resource-samba.git
+    branch: master
+    private_key: {{github-private-key}}
+- name: version
+  type: semver
+  source:
+    driver: git
+    uri: git@github.com:airtonix/concourse-resource-samba.git
+    initial_version: "0.0.1"
+    branch: version
+    file: version
+    private_key: {{github-private-key}}
 - name: hub
   type: docker-image
   source:
     email: {{docker-hub-email}}
     username: {{docker-hub-username}}
     password: {{docker-hub-password}}
-    repository: airtonix/concourse-samba-resource
+    repository: airtonix/concourse-resource-samba
 
 jobs:
 - name: build
@@ -18,6 +29,11 @@ jobs:
   plan:
   - get: repo
     trigger: true
+  - put: version
+    params:
+      bump: minor
   - put: hub
-    params: { build: repo }
+    params:
+      build: repo
+      tag_as_latest: true
 
