@@ -34,8 +34,6 @@ jobs:
   - put: hub
     params:
       build: repo
-      build_args:
-        version: version/version
       tag: version/version
       tag_as_latest: true
   - put: version

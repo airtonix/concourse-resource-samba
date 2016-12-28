@@ -9,7 +9,6 @@ RUN apk update && \
 		tree \
 		samba-client
 
-
 RUN mkdir /mnt/{in, out}
 VOLUME /mnt/in
 VOLUME /mnt/out
