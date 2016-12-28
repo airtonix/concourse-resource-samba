@@ -19,56 +19,52 @@ src=$1
 PATH=/usr/local/bin:$PATH
 
 version="${BUILD_PIPELINE_NAME}-${BUILD_ID}"
-payload=$(mktemp -d /tmp/resource-out.XXXXXX)
-request=$payload/request
-response=$payload/response
-archive=$payload/archive
-bundle=$payload/bundle
+
+request=$(mktemp /tmp/resource-out-request.XXXXXX)
 touch $request
-touch $response
-touch $archive
-mkdir $bundle/$version -p
+
+in_archive_container=$(mktemp -d /tmp/resource-out-archive.XXXXXX)
+in_archive=$in_archive_container/$version
+mkdir $in_archive
 
 ###
 # The request from Concourse
 cat > $request <&0
-log "request"
+log "request" $(jq -C '.' < $request)
 
-connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
-directory=$(jq -r '.source.directory // ""' < $request)
-user=$(jq -r '.source.user // ""' < $request)
-password=$(jq -r '.source.password // ""' < $request)
+resource_connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
+resource_path=$(jq -r '.source.path // ""' < $request)
+resource_user=$(jq -r '.source.user // ""' < $request)
+resource_password=$(jq -r '.source.password // ""' < $request)
 
-destination=$(jq -r '.params.destination // ""' < $request)
-source=$src/$(jq -r '.params.source // ""' < $request)
-
+in_path=$src/$(jq -r '.params.path // "."' < $request)
 
 log "concourse.source" $src
-log "tmp.archive" $bundle/$version
-log "payload.archive" $archive
-log "source.connection" $connection
-log "source.directory" $directory
-log "params.destination" $destination
+
+log "resource.connection" $connection
+log "resource.path" $path
+log "resource.user" $user
+log "in.path" $in_path
+log "in.archive" $in_archive
 
 ###
 # Generate the archive
 #
-log "to-upload" $(tree $source)
-cd $source && \
-	cp -a ./* $bundle/$version/ && \
-	tar C $bundle -cf $archive .
+log "to-upload" $(tree $in_path)
+cd $in_path && \
+	cp -a ./* $in_archive && \
+	tar C $in_archive_container -cf $in_archive .
 
 ###
 # Put the resources
 # - build network command
 log "connection" $connection
 command=$(smb_put \
-	$connection \
-	$directory \
-	$destination \
-	$archive \
-	$user \
-	$password
+	$resource_connection \
+	$resource_path \
+	$in_archive \
+	$resource_user \
+	$resource_password
 )
 # - execute network command
 eval $command 2>&1

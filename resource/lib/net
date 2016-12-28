@@ -9,6 +9,8 @@ smb () {
 }
 
 smb_get () {
+	log "smb_get" $@
+
 	([ -n "${1}" ]) \
 		&& unc=$1 \
 		|| abort "missing //server/share"
@@ -32,26 +34,29 @@ smb_get () {
 }
 
 smb_put () {
+	log "smb_put" $@
+
+	# connection string
 	([ -n "${1}" ]) \
-		&& unc=$1 \
+		&& connection=$1 \
 		|| abort "missing //server/share"
+	# path to upload into
 	([ -n "${2}" ]) \
 		&& path="--directory=${2}" \
-		|| path=""
+	# archive to upload and unpack
 	([ -n "${3}" ]) \
-		&& target="${3}" \
-		|| target=""
+		&& archive=$3 \
+		|| abort "missing archive to upload"
+
+	# username and password
 	([ -n "${4}" ]) \
-		&& archive=$4 \
-		|| archive=""
-	([ -n "${5}" ]) \
-		&& user="--user=${5} " \
+		&& user="--user=${4} " \
 		|| user=""
-	([ -n "${6}" ]) \
-		&& password="${6} " \
+	([ -n "${5}" ]) \
+		&& password="${5} " \
 		|| password="'' -N "
 
-	smb "$unc $password $user $path" -Tx $archive
+	smb "$connection $password $user $path" -Tx $archive
 }
 
 
