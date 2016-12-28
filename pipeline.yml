@@ -14,13 +14,13 @@ resources:
     branch: version
     file: version
     private_key: {{github-private-key}}
-# - name: hub
-#   type: docker-image
-#   source:
-#     email: {{docker-hub-email}}
-#     username: {{docker-hub-username}}
-#     password: {{docker-hub-password}}
-#     repository: airtonix/concourse-resource-samba
+- name: hub
+  type: docker-image
+  source:
+    email: {{docker-hub-email}}
+    username: {{docker-hub-username}}
+    password: {{docker-hub-password}}
+    repository: airtonix/concourse-resource-samba
 
 jobs:
 - name: build
@@ -29,24 +29,11 @@ jobs:
   plan:
   - get: repo
     trigger: true
-  - put: version
+  - get: version
+    params: {file: version}
+  - put: hub
     params:
-      bump: minor
-      file: version/version
-  - task: echo version
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source: {repository: busybox}
-      inputs:
-      - name: version
-      run:
-        path: cat
-        args: ["/version/version"]
-  # - put: hub
-  #   params:
-  #     build: repo
-  #     tag: version/version
-  #     tag_as_latest: true
+      build: repo
+      tag: version/version
+      tag_as_latest: true
 
