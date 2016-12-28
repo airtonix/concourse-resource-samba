@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 
-source /opt/resource/lib/colours
-source /opt/resource/lib/log
-source /opt/resource/lib/crypto
-source /opt/resource/lib/net
+set -e -u
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+source $(dirname $0)/lib/colours
+source $(dirname $0)/lib/log
+source $(dirname $0)/lib/crypto
+source $(dirname $0)/lib/net
 
 set_log_prefix "resource/out"
 log "start" $1
 
 src=$1
-[ -z "${src}" ] && abort "usage: ${0} <path/to/destination>"
+[ -z "$src" ] && abort "usage: ${0} <path/to/source>"
 
 # for jq
 PATH=/usr/local/bin:$PATH

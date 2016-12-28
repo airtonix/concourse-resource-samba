@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source /opt/resource/lib/colours
+. /opt/resource/lib/colours
 
 LOG_PREFIX=''
 
@@ -19,7 +19,7 @@ set_log_prefix () {
 #  * @void
 #  */
 log () {
-  clr_bold clr_green "${LOG_PREFIX}${1} " -n; echo ${@:2} 1>&2
+  clr_bold clr_green "${LOG_PREFIX}${1} " -n; echo ${@:2};
 }
 
 # /**
@@ -27,7 +27,7 @@ log () {
 #  * @return {Exit 1}
 #  */
 abort () {
-  clr_bold clr_red "${LOG_PREFIX}abort " -n; echo $@ 1>&2
+  clr_bold clr_red "${LOG_PREFIX}abort " -n; echo $@;
   exit 1
 }
 
