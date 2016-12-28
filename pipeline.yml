@@ -29,15 +29,14 @@ jobs:
   plan:
   - get: repo
     trigger: true
-  - put: version
-    params:
-      file: version
-      bump: minor
   - get: version
-    params: {file: version}
+    params: {bump: minor}
   - put: hub
     params:
       build: repo
+      build_args:
+        version: version/version
       tag: version/version
       tag_as_latest: true
-
+  - put: version
+    params: {file: version/version}
