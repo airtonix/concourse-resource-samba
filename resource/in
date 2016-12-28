@@ -35,7 +35,7 @@ connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
 directory=$(jq -r '.source.directory // ""' < $request)
 user=$(jq -r '.source.user // ""' < $request)
 password=$(jq -r '.source.password // ""' < $request)
-path=$(jq -r '.params.path // ""' < $request)
+source=$(jq -r '.params.source // ""' < $request)
 
 ###
 # Get the resources
@@ -44,7 +44,7 @@ log "connection" $connection
 command=$(smb_get \
 	$connection \
 	$directory \
-	$path \
+	$source \
 	$archive \
 	$user \
 	$password

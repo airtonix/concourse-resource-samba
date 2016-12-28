@@ -23,7 +23,7 @@ resources:
     repository: airtonix/concourse-resource-samba
 
 jobs:
-- name: build
+- name: fetch
   public: true
   serial: true
   plan:
@@ -31,10 +31,24 @@ jobs:
     trigger: true
   - get: version
     params: {bump: patch}
+- name: build
+  public: true
+  serial: true
+  plan:
+  - get: repo
+    trigger: true
+    passed: [fetch]
+  - get: version
+    passed: [fetch]
   - put: hub
     params:
       build: repo
       tag: version/version
       tag_as_latest: true
+- name: bump
+  public: true
+  serial: true
+  plan:
   - put: version
+    passed: [build]
     params: {file: version/version}

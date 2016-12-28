@@ -38,20 +38,23 @@ connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
 directory=$(jq -r '.source.directory // ""' < $request)
 user=$(jq -r '.source.user // ""' < $request)
 password=$(jq -r '.source.password // ""' < $request)
-path=$(jq -r '.params.path // ""' < $request)
+
+destination=$(jq -r '.params.destination // ""' < $request)
+source=$src/$(jq -r '.params.source // ""' < $request)
+
 
 log "concourse.source" $src
 log "tmp.archive" $bundle/$version
 log "payload.archive" $archive
 log "source.connection" $connection
 log "source.directory" $directory
-log "params.path" $path
+log "params.destination" $destination
 
 ###
 # Generate the archive
 #
-log "to-upload" $(ls $src)
-cd $src && \
+log "to-upload" $(tree $source)
+cd $source && \
 	cp -a ./* $bundle/$version/ && \
 	tar C $bundle -cf $archive .
 
@@ -62,7 +65,7 @@ log "connection" $connection
 command=$(smb_put \
 	$connection \
 	$directory \
-	$path \
+	$destination \
 	$archive \
 	$user \
 	$password
