@@ -10,7 +10,7 @@ source $(dirname $0)/lib/crypto
 source $(dirname $0)/lib/net
 
 set_log_prefix "resource/out"
-log "start" $1
+log "start"
 
 src=$1
 [ -z "$src" ] && abort "usage: ${0} <path/to/source>"
@@ -35,10 +35,17 @@ cat > $request <&0
 log "request"
 
 connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
-path=$(jq -r '.source.path // ""' < $request)
+directory=$(jq -r '.source.directory // ""' < $request)
 user=$(jq -r '.source.user // ""' < $request)
 password=$(jq -r '.source.password // ""' < $request)
-target=$(jq -r '.params.path // ""' < $request)
+path=$(jq -r '.params.path // ""' < $request)
+
+log "concourse.source" $src
+log "tmp.archive" $bundle/$version
+log "payload.archive" $archive
+log "source.connection" $connection
+log "source.directory" $directory
+log "params.path" $path
 
 ###
 # Generate the archive
@@ -54,8 +61,8 @@ cd $src && \
 log "connection" $connection
 command=$(smb_put \
 	$connection \
+	$directory \
 	$path \
-	$target \
 	$archive \
 	$user \
 	$password
