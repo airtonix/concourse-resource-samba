@@ -29,6 +29,10 @@ jobs:
   plan:
   - get: repo
     trigger: true
+  - put: version
+    params:
+      file: version
+      bump: minor
   - get: version
     params: {file: version}
   - put: hub
