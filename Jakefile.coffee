@@ -20,7 +20,7 @@ task 'sync', () ->
 	].join(' ')
 
 	jake.exec cmd, JAKE_EXEC_OPTIONS, () ->
-		console.log('done')
+		jake.logger.log('done')
 		complete()
 
 task 'unpause', () ->
@@ -30,7 +30,7 @@ task 'unpause', () ->
 		"--pipeline #{PIPELINE_NAME}"
 	].join(' ')
 	jake.exec cmd, JAKE_EXEC_OPTIONS, () ->
-		console.log('done')
+		jake.logger.log('done')
 		complete()
 
 task 'show', ()->
@@ -41,10 +41,11 @@ task 'show', ()->
 	].join(' ')
 
 	jake.exec cmd, JAKE_EXEC_OPTIONS, (err) ->
-		console.log('done')
+		jake.logger.log('done')
 		complete()
 
 task 'trigger', (job) ->
+	job = job or process.env.job or 'build'
 
 	cmd = [
 		'fly trigger-job'
@@ -52,15 +53,11 @@ task 'trigger', (job) ->
 		"-j #{PIPELINE_NAME}/#{job}"
 	].join(' ')
 
-	console.log(cmd)
-
-	jake.exec cmd, JAKE_EXEC_OPTIONS, (err) ->
-		console.log('done')
+	jake.exec cmd, JAKE_EXEC_OPTIONS, () ->
+		jake.logger.log('done')
 		complete()
 
 
 
-task 'default', ['sync', 'unpause', 'trigger']
-
-jake.addListener 'complete', () ->
-  process.exit()
+task 'ci', ['sync', 'unpause', 'trigger']
+task 'default', ['ci']

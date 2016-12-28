@@ -5,7 +5,6 @@ set -e -u
 exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
-source $(dirname $0)/lib/colours
 source $(dirname $0)/lib/log
 source $(dirname $0)/lib/crypto
 source $(dirname $0)/lib/net
@@ -70,4 +69,4 @@ mv $payload/tmp/$path/$target $destination
 response="{ \"ref\": \"${hash}\" }"
 log "response" $response
 # - send response
-echo $response
+success $response
