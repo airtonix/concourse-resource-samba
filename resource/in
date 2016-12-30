@@ -31,7 +31,7 @@ touch $archive
 cat > $request <&0
 log "request"
 
-connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
+uri=$(jq -r '.source.uri' < $request)
 directory=$(jq -r '.source.directory // ""' < $request)
 user=$(jq -r '.source.user // ""' < $request)
 password=$(jq -r '.source.password // ""' < $request)

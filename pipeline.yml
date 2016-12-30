@@ -17,38 +17,42 @@ resources:
 - name: hub
   type: docker-image
   source:
-    email: {{docker-hub-email}}
-    username: {{docker-hub-username}}
-    password: {{docker-hub-password}}
-    repository: airtonix/concourse-resource-samba
+    username: airtonix
+    password: password
+    repository: registry.thelma.lan:5000/concourse-resource-samba
+    insecure_registries: ["registry.thelma.lan:5000"]
 
 jobs:
 - name: fetch
   public: true
   serial: true
   plan:
-  - get: repo
-    trigger: true
-  - get: version
-    params: {bump: patch}
+  - aggregate:
+    - get: version
+      params: {bump: patch}
+      trigger: true
+    - get: repo
+      trigger: true
+
 - name: build
   public: true
   serial: true
   plan:
-  - get: repo
-    trigger: true
-    passed: [fetch]
   - get: version
+    passed: [fetch]
+  - get: repo
     passed: [fetch]
   - put: hub
     params:
       build: repo
       tag: version/version
       tag_as_latest: true
+
 - name: bump
   public: true
   serial: true
   plan:
-  - put: version
+  - get: version
     passed: [build]
+  - put: version
     params: {file: version/version}

@@ -32,26 +32,23 @@ mkdir $in_archive
 cat > $request <&0
 log "request" $(jq -C '.' < $request)
 
-resource_connection=$(jq -r '"//\(.source.server)/\(.source.share)"' < $request)
-resource_path=$(jq -r '.source.path // ""' < $request)
+resource_uri=$(jq -r '.source.uri // ""' < $request)
 resource_user=$(jq -r '.source.user // ""' < $request)
 resource_password=$(jq -r '.source.password // ""' < $request)
 
-in_path=$src/$(jq -r '.params.path // "."' < $request)
+params_path=$src/$(jq -r '.params.path // "."' < $request)
 
 log "concourse.source" $src
-
-log "resource.connection" $connection
-log "resource.path" $path
-log "resource.user" $user
-log "in.path" $in_path
-log "in.archive" $in_archive
+log "resource.uri" $resource_uri
+log "resource.user" $resource_user
+log "resource.pasword" [[ -n "${resource_password}" ]] && '<hidden>' || ''
+log "params.path" $params_path
 
 ###
 # Generate the archive
 #
-log "to-upload" $(tree $in_path)
-cd $in_path && \
+log "out.payload" $(tree $params_path)
+cd $params_path && \
 	cp -a ./* $in_archive && \
 	tar C $in_archive_container -cf $in_archive .
 
@@ -60,7 +57,7 @@ cd $in_path && \
 # - build network command
 log "connection" $connection
 command=$(smb_put \
-	$resource_connection \
+	$resource_uri \
 	$resource_path \
 	$in_archive \
 	$resource_user \

@@ -11,38 +11,44 @@ smb () {
 smb_get () {
 	log "smb_get" $@
 
+	# uri string
 	([ -n "${1}" ]) \
-		&& unc=$1 \
+		&& uri=$1 \
 		|| abort "missing //server/share"
+
+	# path to bundle and download
 	([ -n "${2}" ]) \
-		&& path="--directory=${2}" \
+		&& path="${2}" \
 		|| path=""
+
+	# archive to download into
 	([ -n "${3}" ]) \
-		&& target="${3}" \
-		|| target=""
-	([ -n "${4}" ]) \
-		&& archive=$4 \
+		&& archive=$3 \
 		|| archive=""
-	([ -n "${5}" ]) \
-		&& user="--user=${5} " \
+
+	# username and password
+	([ -n "${4}" ]) \
+		&& user="--user=${4} " \
 		|| user=""
-	([ -n "${6}" ]) \
-		&& password="${6} " \
+	([ -n "${5}" ]) \
+		&& password="${5} " \
 		|| password="'' -N "
 
-	smb "$unc $password $user $path" -Tc $archive $target
+	smb "$uri $password $user" -Tc $archive $path
 }
 
 smb_put () {
 	log "smb_put" $@
 
-	# connection string
+	# uri string
 	([ -n "${1}" ]) \
-		&& connection=$1 \
+		&& uri=$1 \
 		|| abort "missing //server/share"
+
 	# path to upload into
 	([ -n "${2}" ]) \
 		&& path="--directory=${2}" \
+
 	# archive to upload and unpack
 	([ -n "${3}" ]) \
 		&& archive=$3 \
@@ -56,7 +62,7 @@ smb_put () {
 		&& password="${5} " \
 		|| password="'' -N "
 
-	smb "$connection $password $user $path" -Tx $archive
+	smb "$uri $password $user $path" -Tx $archive
 }
 
 
