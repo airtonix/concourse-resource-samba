@@ -19,29 +19,18 @@ resources:
   source:
     username: airtonix
     password: password
-    repository: registry.thelma.lan:5000/concourse-resource-samba
-    insecure_registries: ["registry.thelma.lan:5000"]
+    repository: registry.thelma.lan/concourse-resource-samba
+    insecure_registries: ["registry.thelma.lan"]
 
 jobs:
-- name: fetch
-  public: true
-  serial: true
-  plan:
-  - aggregate:
-    - get: version
-      params: {bump: patch}
-      trigger: true
-    - get: repo
-      trigger: true
-
 - name: build
   public: true
   serial: true
   plan:
-  - get: version
-    passed: [fetch]
   - get: repo
-    passed: [fetch]
+    trigger: true
+  - get: version
+    params: {bump: patch}
   - put: hub
     params:
       build: repo
@@ -52,7 +41,11 @@ jobs:
   public: true
   serial: true
   plan:
+  - get: hub
+    passed: [build]
+    trigger: true
   - get: version
     passed: [build]
   - put: version
-    params: {file: version/version}
+    params:
+      bump: patch

@@ -14,7 +14,8 @@ task 'login', () ->
 		"--username #{process.env.CONCOURSE_USERNAME}"
 		"--password #{process.env.CONCOURSE_PASSWORD}"
 	].join(' ')
-	jake.exec cmd, {printStdout: true}, () ->
+
+	jake.exec cmd, {printStdout: true, interactive: true}, () ->
 		console.log('done')
 		complete()
 
@@ -42,7 +43,7 @@ task 'unpause', () ->
 		console.log('done')
 		complete()
 
-task 'trigger', () ->
+task 'trigger', (job) ->
 	cmd = [
 		'fly trigger-job'
 		'--target main'

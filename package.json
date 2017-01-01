@@ -9,7 +9,8 @@
     "ci": "ci"
   },
   "scripts": {
-    "jake": "jake"
+    "jake": "jake",
+    "trigger": "jake login sync unpause"
   },
   "keywords": [],
   "author": "",
